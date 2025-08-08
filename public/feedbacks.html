@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lista de Feedbacks</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: #007BFF;
+      color: white;
+    }
+    button {
+      padding: 5px 10px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    button:hover {
+      background: #c82333;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Feedbacks Recebidos</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Feedback</th>
+        <th>Data</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="feedback-list">
+      <!-- Feedbacks vão aqui -->
+    </tbody>
+  </table>
+
+  <script>
+    const feedbackList = document.getElementById('feedback-list');
+
+    // Função para buscar e mostrar feedbacks
+    function carregarFeedbacks() {
+      fetch('http://localhost:3000/feedbacks')
+        .then(res => res.json())
+        .then(data => {
+          feedbackList.innerHTML = '';
+          data.forEach(fb => {
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+              <td>${fb.id}</td>
+              <td>${fb.nome}</td>
+              <td>${fb.resposta}</td>
+              <td>${new Date(fb.data).toLocaleString('pt-BR')}</td>
+              <td><button onclick="deletarFeedback(${fb.id})">Deletar</button></td>
+            `;
+
+            feedbackList.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          feedbackList.innerHTML = `<tr><td colspan="5">Erro ao carregar feedbacks.</td></tr>`;
+          console.error('Erro:', err);
+        });
+    }
+
+    // Função para deletar feedback
+    function deletarFeedback(id) {
+      if (!confirm('Tem certeza que deseja deletar este feedback?')) return;
+
+      fetch(`http://localhost:3000/feedback/${id}`, {
+        method: 'DELETE'
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.mensagem);
+        carregarFeedbacks(); // Atualiza a lista
+      })
+      .catch(err => {
+        alert('Erro ao deletar feedback.');
+        console.error(err);
+      });
+    }
+
+    // Carrega feedbacks ao abrir a página
+    carregarFeedbacks();
+  </script>
+
+</body>
+</html>
